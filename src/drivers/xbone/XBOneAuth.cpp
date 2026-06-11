@@ -12,19 +12,27 @@
 #include "drivers/shared/xinput_host.h"
 
 void XBOneAuth::initialize() {
-    if ( available() ) {
-        listener = new XBOneAuthUSBListener();
-        xboxOneAuthData.xboneState = GPAuthState::auth_idle_state;
-        xboxOneAuthData.authCompleted = false;
-        ((XBOneAuthUSBListener*)listener)->setup();
-        ((XBOneAuthUSBListener*)listener)->setAuthData(&xboxOneAuthData);
-    }
+    if (!available())
+        return;
+
+    listener = new XBOneAuthUSBListener();
+
+    xboxOneAuthData.xboneState    = GPAuthState::auth_idle_state;
+    xboxOneAuthData.authCompleted = false;
+
+    XBOneAuthUSBListener *l = (XBOneAuthUSBListener *)listener;
+    l->setup();
+    l->setAuthData(&xboxOneAuthData);
 }
+
 
 bool XBOneAuth::available() {
     return PeripheralManager::getInstance().isUSBEnabled(0);
 }
 
+
 void XBOneAuth::process() {
-    ((XBOneAuthUSBListener*)listener)->process();
+    if (listener == nullptr)
+        return;
+    ((XBOneAuthUSBListener *)listener)->process();
 }
